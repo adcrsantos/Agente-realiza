@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Realiza Tour">
 <title>Assistente Realiza Tour</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --verde: #0D6B4E;
@@ -43,6 +43,7 @@
     background: var(--bg);
   }
 
+  /* HEADER */
   .header {
     background: var(--verde);
     padding: 14px 18px;
@@ -53,85 +54,286 @@
   }
 
   .header-avatar {
-    width: 38px; height: 38px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     background: rgba(255,255,255,0.15);
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
   }
 
   .header-avatar svg { width: 20px; height: 20px; }
-  .header-info { flex: 1; }
-  .header-nome { font-size: 15px; font-weight: 600; color: white; line-height: 1.2; }
-  .header-status { font-size: 12px; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 5px; }
-  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; }
 
+  .header-info { flex: 1; }
+
+  .header-nome {
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    line-height: 1.2;
+  }
+
+  .header-status {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4ADE80;
+  }
+
+  /* MENSAGENS */
   .messages {
-    flex: 1; overflow-y: auto;
+    flex: 1;
+    overflow-y: auto;
     padding: 16px 14px;
-    display: flex; flex-direction: column; gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     scroll-behavior: smooth;
   }
+
   .messages::-webkit-scrollbar { width: 0; }
 
-  .msg-row { display: flex; align-items: flex-end; gap: 8px; animation: fadeUp 0.25s ease; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .msg-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    animation: fadeUp 0.25s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .msg-row.user { justify-content: flex-end; }
   .msg-row.agent { justify-content: flex-start; }
 
   .msg-avatar {
-    width: 28px; height: 28px; border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
     background: var(--verde-claro);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; font-size: 12px; font-weight: 600; color: var(--verde);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--verde);
   }
 
-  .bubble { max-width: 82%; padding: 10px 14px; border-radius: 18px; font-size: 14px; line-height: 1.5; }
-  .bubble.user { background: var(--verde-msg); color: white; border-radius: 18px 18px 4px 18px; }
-  .bubble.agent { background: var(--card); color: var(--texto); border: 0.5px solid var(--borda); border-radius: 18px 18px 18px 4px; }
+  .bubble {
+    max-width: 82%;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
 
-  .bubble-time { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 4px; text-align: right; }
-  .bubble.agent .bubble-time { color: var(--suave); text-align: left; }
+  .bubble.user {
+    background: var(--verde-msg);
+    color: white;
+    border-radius: 18px 18px 4px 18px;
+  }
 
-  .dados-card { background: var(--verde-claro); border-radius: 10px; padding: 10px 12px; margin-top: 8px; font-size: 13px; line-height: 2; }
-  .dado-linha { display: flex; gap: 6px; }
+  .bubble.agent {
+    background: var(--card);
+    color: var(--texto);
+    border: 0.5px solid var(--borda);
+    border-radius: 18px 18px 18px 4px;
+  }
+
+  .bubble-time {
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    margin-top: 4px;
+    text-align: right;
+  }
+
+  .bubble.agent .bubble-time {
+    color: var(--suave);
+    text-align: left;
+  }
+
+  /* CARD DE DADOS EXTRAÍDOS */
+  .dados-card {
+    background: var(--verde-claro);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 2;
+  }
+
+  .dado-linha {
+    display: flex;
+    gap: 6px;
+  }
+
   .dado-label { color: var(--suave); min-width: 70px; }
   .dado-valor { color: var(--texto); font-weight: 500; }
 
-  .status-badge { display: inline-block; padding: 1px 8px; border-radius: 20px; font-size: 12px; font-weight: 500; background: var(--amarelo); color: var(--amarelo-txt); }
-  .status-badge.enviado { background: #D1FAE5; color: #065F46; }
+  .status-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--amarelo);
+    color: var(--amarelo-txt);
+  }
 
+  .status-badge.enviado {
+    background: #D1FAE5;
+    color: #065F46;
+  }
+
+  /* LISTA DE CLIENTES */
   .clientes-lista { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
-  .cliente-item { background: white; border-radius: 8px; padding: 8px 12px; font-size: 13px; border: 0.5px solid var(--borda); }
+
+  .cliente-item {
+    background: white;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    border: 0.5px solid var(--borda);
+  }
+
   .cliente-nome { font-weight: 500; color: var(--texto); }
   .cliente-detalhe { color: var(--suave); font-size: 12px; margin-top: 2px; }
 
-  .typing { display: flex; gap: 4px; align-items: center; padding: 12px 16px; }
-  .typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--suave); animation: blink 1.2s infinite; }
+  /* LOADING */
+  .typing {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 12px 16px;
+  }
+
+  .typing span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--suave);
+    animation: blink 1.2s infinite;
+  }
+
   .typing span:nth-child(2) { animation-delay: 0.2s; }
   .typing span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes blink { 0%, 60%, 100% { opacity: 0.2; transform: scale(0.8); } 30% { opacity: 1; transform: scale(1); } }
 
-  .input-area { background: var(--card); border-top: 0.5px solid var(--borda); padding: 10px 12px; display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; }
-  .input-wrap { flex: 1; background: var(--bg); border-radius: 22px; border: 0.5px solid var(--borda); display: flex; align-items: flex-end; padding: 8px 14px; gap: 8px; }
+  @keyframes blink {
+    0%, 60%, 100% { opacity: 0.2; transform: scale(0.8); }
+    30% { opacity: 1; transform: scale(1); }
+  }
 
-  textarea { flex: 1; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--texto); resize: none; outline: none; max-height: 90px; line-height: 1.5; overflow-y: auto; }
+  /* INPUT */
+  .input-area {
+    background: var(--card);
+    border-top: 0.5px solid var(--borda);
+    padding: 10px 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+
+  .input-wrap {
+    flex: 1;
+    background: var(--bg);
+    border-radius: 22px;
+    border: 0.5px solid var(--borda);
+    display: flex;
+    align-items: flex-end;
+    padding: 8px 14px;
+    gap: 8px;
+  }
+
+  textarea {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--texto);
+    resize: none;
+    outline: none;
+    max-height: 90px;
+    line-height: 1.5;
+    overflow-y: auto;
+  }
+
   textarea::placeholder { color: var(--suave); }
 
-  .send-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--verde); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s, transform 0.1s; }
+  .send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--verde);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, transform 0.1s;
+  }
+
   .send-btn:active { transform: scale(0.93); background: var(--verde-meio); }
   .send-btn svg { width: 18px; height: 18px; }
 
-  .dicas { padding: 8px 14px 2px; display: flex; gap: 8px; overflow-x: auto; flex-shrink: 0; }
+  /* DICAS RÁPIDAS */
+  .dicas {
+    padding: 8px 14px 2px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    flex-shrink: 0;
+  }
+
   .dicas::-webkit-scrollbar { display: none; }
-  .dica { background: white; border: 0.5px solid var(--borda); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--verde); white-space: nowrap; cursor: pointer; font-weight: 500; transition: background 0.15s; }
+
+  .dica {
+    background: white;
+    border: 0.5px solid var(--borda);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--verde);
+    white-space: nowrap;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.15s;
+  }
+
   .dica:active { background: var(--verde-claro); }
 
-  .sheet-notice { background: #FFF8EC; border: 0.5px solid #F5C87A; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #856404; margin-top: 8px; display: flex; gap: 6px; align-items: flex-start; }
+  .sheet-notice {
+    background: #FFF8EC;
+    border: 0.5px solid #F5C87A;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #856404;
+    margin-top: 8px;
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+  }
 </style>
 </head>
 <body>
 <div class="app">
+
   <div class="header">
     <div class="header-avatar">
       <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -140,7 +342,10 @@
     </div>
     <div class="header-info">
       <div class="header-nome">Assistente Realiza Tour</div>
-      <div class="header-status"><div class="status-dot"></div>online agora</div>
+      <div class="header-status">
+        <div class="status-dot"></div>
+        online agora
+      </div>
     </div>
   </div>
 
@@ -156,12 +361,11 @@
     </div>
   </div>
 
-  <div class="dicas">
+  <div class="dicas" id="dicas">
     <div class="dica" onclick="usarDica(this)">Novo interesse de cliente</div>
     <div class="dica" onclick="usarDica(this)">Quem quer ir pra Gramado?</div>
     <div class="dica" onclick="usarDica(this)">Listar clientes aguardando</div>
     <div class="dica" onclick="usarDica(this)">Atualizar status de cliente</div>
-    <div class="dica" onclick="usarDica(this)">Listar vendidos</div>
   </div>
 
   <div class="input-area">
@@ -174,17 +378,17 @@
       </svg>
     </button>
   </div>
+
 </div>
 
 <script>
 const input = document.getElementById('input');
 const messagesEl = document.getElementById('messages');
-
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxkezr9JYIZGYq-TfQHTcrakHjqxl0BcrUCIow4pF_p15BjfshQnudUAdYGpYDDGIafnQ/exec';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxO4CfKFD24cTV7gsHoDlJi11MPnvXQa6dJ-rcwnJdIb_VDm7O90A7fpLK-zA0y2g3YFQ/exec';
 
 async function chamarAgente(texto) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 35000);
+  const timeout = setTimeout(() => controller.abort(), 30000);
   try {
     const res = await fetch(SHEETS_URL, {
       method: 'POST',
@@ -194,49 +398,87 @@ async function chamarAgente(texto) {
       body: JSON.stringify({ acao: 'mensagem', texto })
     });
     clearTimeout(timeout);
-    return JSON.parse(await res.text());
+    const text = await res.text();
+    return JSON.parse(text);
   } catch (err) {
     clearTimeout(timeout);
     throw err;
   }
 }
 
-input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 90) + 'px'; });
-input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar(); } });
-function usarDica(el) { input.value = el.textContent; input.focus(); }
-function agora() { return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 90) + 'px';
+});
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar(); }
+});
+
+function usarDica(el) {
+  input.value = el.textContent;
+  input.focus();
+}
+
+function agora() {
+  return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
 
 function addMsg(tipo, html, time) {
   const row = document.createElement('div');
   row.className = 'msg-row ' + tipo;
-  if (tipo === 'agent') { const av = document.createElement('div'); av.className = 'msg-avatar'; av.textContent = 'RT'; row.appendChild(av); }
+  if (tipo === 'agent') {
+    const av = document.createElement('div');
+    av.className = 'msg-avatar';
+    av.textContent = 'RT';
+    row.appendChild(av);
+  }
   const wrap = document.createElement('div');
-  const bubble = document.createElement('div'); bubble.className = 'bubble ' + tipo; bubble.innerHTML = html;
-  const t = document.createElement('div'); t.className = 'bubble-time'; t.textContent = time || agora();
-  wrap.appendChild(bubble); wrap.appendChild(t); row.appendChild(wrap);
-  messagesEl.appendChild(row); messagesEl.scrollTop = messagesEl.scrollHeight;
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + tipo;
+  bubble.innerHTML = html;
+  const t = document.createElement('div');
+  t.className = 'bubble-time';
+  t.textContent = time || agora();
+  wrap.appendChild(bubble);
+  wrap.appendChild(t);
+  row.appendChild(wrap);
+  messagesEl.appendChild(row);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return bubble;
 }
 
 function addTyping() {
-  const row = document.createElement('div'); row.className = 'msg-row agent'; row.id = 'typing';
-  const av = document.createElement('div'); av.className = 'msg-avatar'; av.textContent = 'RT'; row.appendChild(av);
-  const bubble = document.createElement('div'); bubble.className = 'bubble agent';
+  const row = document.createElement('div');
+  row.className = 'msg-row agent';
+  row.id = 'typing';
+  const av = document.createElement('div');
+  av.className = 'msg-avatar';
+  av.textContent = 'RT';
+  row.appendChild(av);
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble agent';
   bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-  row.appendChild(bubble); messagesEl.appendChild(row); messagesEl.scrollTop = messagesEl.scrollHeight;
+  row.appendChild(bubble);
+  messagesEl.appendChild(row);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-function removeTyping() { const t = document.getElementById('typing'); if (t) t.remove(); }
+function removeTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
 
 function buildDadosCard(dados) {
-  const sc = dados.status && dados.status.toLowerCase().includes('orçamento') ? 'enviado' : '';
-  return `Registrado! Aqui o que salvei:
+  const statusClass = dados.status && dados.status.toLowerCase().includes('orçamento') ? 'enviado' : '';
+  return `
+    Registrado! Aqui o que salvei:
     <div class="dados-card">
-      <div class="dado-linha"><span class="dado-label">Cliente</span><span class="dado-valor">${dados.nome||'—'}</span></div>
-      <div class="dado-linha"><span class="dado-label">Destino</span><span class="dado-valor">${dados.destino||'—'}</span></div>
-      <div class="dado-linha"><span class="dado-label">Período</span><span class="dado-valor">${dados.periodo||'—'}</span></div>
-      <div class="dado-linha"><span class="dado-label">Tipo</span><span class="dado-valor">${dados.tipo||'—'}</span></div>
-      <div class="dado-linha"><span class="dado-label">Status</span><span class="dado-valor"><span class="status-badge ${sc}">${dados.status||'—'}</span></span></div>
-      ${dados.observacoes ? `<div class="dado-linha"><span class="dado-label">Obs.</span><span class="dado-valor">${dados.observacoes}</span></div>` : ''}
+      <div class="dado-linha"><span class="dado-label">Cliente</span><span class="dado-valor">${dados.nome || '—'}</span></div>
+      <div class="dado-linha"><span class="dado-label">Destino</span><span class="dado-valor">${dados.destino || '—'}</span></div>
+      <div class="dado-linha"><span class="dado-label">Período</span><span class="dado-valor">${dados.periodo || '—'}</span></div>
+      <div class="dado-linha"><span class="dado-label">Tipo</span><span class="dado-valor">${dados.tipo || '—'}</span></div>
+      <div class="dado-linha"><span class="dado-label">Status</span><span class="dado-valor"><span class="status-badge ${statusClass}">${dados.status || '—'}</span></span></div>
     </div>
     <div class="sheet-notice">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -246,41 +488,58 @@ function buildDadosCard(dados) {
 
 function buildListaCard(lista) {
   if (!lista || lista.length === 0) return 'Nenhum cliente encontrado com esse critério.';
-  return `Encontrei ${lista.length} cliente(s):<div class="clientes-lista">${lista.map(c => `
+  const items = lista.map(c => `
     <div class="cliente-item">
       <div class="cliente-nome">${c.nome}</div>
-      <div class="cliente-detalhe">${c.detalhe||(c.destino+' · '+c.periodo+' · '+c.status)}</div>
-    </div>`).join('')}</div>`;
+      <div class="cliente-detalhe">${c.detalhe || (c.destino + ' · ' + c.periodo + ' · ' + c.status)}</div>
+    </div>`).join('');
+  return `Encontrei ${lista.length} cliente(s):<div class="clientes-lista">${items}</div>`;
 }
 
 async function enviar() {
   const texto = input.value.trim();
   if (!texto) return;
+
   addMsg('user', texto);
-  input.value = ''; input.style.height = 'auto';
+  input.value = '';
+  input.style.height = 'auto';
   addTyping();
+
   try {
     const resultado = await chamarAgente(texto);
     removeTyping();
-    if (!resultado.ok) { addMsg('agent', 'Erro ao processar. Tente novamente.'); return; }
+
+    if (!resultado.ok) {
+      addMsg('agent', 'Erro ao processar. Tente novamente.');
+      return;
+    }
+
     const parsed = resultado.parsed;
+
     if (parsed.tipo === 'registro') {
       addMsg('agent', buildDadosCard(parsed.dados));
     } else if (parsed.tipo === 'consulta') {
-      addMsg('agent', buildListaCard((parsed.lista||[]).map(c => ({ nome: c.nome, detalhe: c.detalhe||(c.destino+' · '+c.periodo+' · '+c.status) }))));
+      const lista = (parsed.lista || []).map(c => ({
+        nome: c.nome,
+        detalhe: c.detalhe || (c.destino + ' · ' + c.periodo + ' · ' + c.status)
+      }));
+      addMsg('agent', buildListaCard(lista));
     } else if (parsed.tipo === 'atualizacao') {
       if (parsed.atualizado) {
         const nome = parsed.nome_completo || parsed.nome;
         const cancelado = parsed.valor && parsed.valor.toLowerCase() === 'cancelado';
         const confirmado = parsed.valor && parsed.valor.toLowerCase() === 'confirmado';
-        const sc = confirmado ? 'enviado' : '';
-        const motivoHtml = cancelado
-          ? `<div class="dado-linha"><span class="dado-label">Motivo</span><span class="dado-valor" style="color:#856404;">${parsed.motivo||'Não informado'}</span></div>`
+        const statusClass = confirmado ? 'enviado' : '';
+        const motivoHtml = cancelado && parsed.motivo
+          ? `<div class="dado-linha"><span class="dado-label">Motivo</span><span class="dado-valor" style="color:#856404;">${parsed.motivo}</span></div>`
+          : cancelado
+          ? `<div class="dado-linha"><span class="dado-label">Motivo</span><span class="dado-valor" style="color:var(--suave);">Não informado</span></div>`
           : '';
-        addMsg('agent', `Status atualizado com sucesso!
+        addMsg('agent', `
+          Status atualizado com sucesso!
           <div class="dados-card" style="margin-top:8px;">
             <div class="dado-linha"><span class="dado-label">Cliente</span><span class="dado-valor">${nome}</span></div>
-            <div class="dado-linha"><span class="dado-label">Novo status</span><span class="dado-valor"><span class="status-badge ${sc}">${parsed.valor}</span></span></div>
+            <div class="dado-linha"><span class="dado-label">Novo status</span><span class="dado-valor"><span class="status-badge ${statusClass}">${parsed.valor}</span></span></div>
             ${motivoHtml}
           </div>
           <div class="sheet-notice">
@@ -293,9 +552,11 @@ async function enviar() {
     } else {
       addMsg('agent', parsed.mensagem || 'Pode repetir de outra forma?');
     }
+
   } catch (err) {
     removeTyping();
     addMsg('agent', 'Erro ao processar. Tente novamente.');
+    console.error(err);
   }
 }
 </script>
