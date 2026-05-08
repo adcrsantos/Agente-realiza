@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Realiza Tour">
+<title>Assistente Realiza Tour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #0D6B4E;
+    --verde-meio: #1A9E75;
+    --verde-claro: #E1F5EE;
+    --verde-msg: #1D9E75;
+    --bg: #F0F2F0;
+    --card: #FFFFFF;
+    --texto: #111816;
+    --suave: #6B7B74;
+    --borda: #E2EAE6;
+    --amarelo: #FFF3CD;
+    --amarelo-txt: #856404;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--texto);
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--bg);
+  }
+
+  .header {
+    background: var(--verde);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .header-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .header-avatar svg { width: 20px; height: 20px; }
+  .header-info { flex: 1; }
+  .header-nome { font-size: 15px; font-weight: 600; color: white; line-height: 1.2; }
+  .header-status { font-size: 12px; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 5px; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ADE80; }
+
+  .messages {
+    flex: 1; overflow-y: auto;
+    padding: 16px 14px;
+    display: flex; flex-direction: column; gap: 10px;
+    scroll-behavior: smooth;
+  }
+  .messages::-webkit-scrollbar { width: 0; }
+
+  .msg-row { display: flex; align-items: flex-end; gap: 8px; animation: fadeUp 0.25s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .msg-row.user { justify-content: flex-end; }
+  .msg-row.agent { justify-content: flex-start; }
+
+  .msg-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--verde-claro);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 12px; font-weight: 600; color: var(--verde);
+  }
+
+  .bubble { max-width: 82%; padding: 10px 14px; border-radius: 18px; font-size: 14px; line-height: 1.5; }
+  .bubble.user { background: var(--verde-msg); color: white; border-radius: 18px 18px 4px 18px; }
+  .bubble.agent { background: var(--card); color: var(--texto); border: 0.5px solid var(--borda); border-radius: 18px 18px 18px 4px; }
+
+  .bubble-time { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 4px; text-align: right; }
+  .bubble.agent .bubble-time { color: var(--suave); text-align: left; }
+
+  .dados-card { background: var(--verde-claro); border-radius: 10px; padding: 10px 12px; margin-top: 8px; font-size: 13px; line-height: 2; }
+  .dado-linha { display: flex; gap: 6px; }
+  .dado-label { color: var(--suave); min-width: 70px; }
+  .dado-valor { color: var(--texto); font-weight: 500; }
+
+  .status-badge { display: inline-block; padding: 1px 8px; border-radius: 20px; font-size: 12px; font-weight: 500; background: var(--amarelo); color: var(--amarelo-txt); }
+  .status-badge.enviado { background: #D1FAE5; color: #065F46; }
+
+  .clientes-lista { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .cliente-item { background: white; border-radius: 8px; padding: 8px 12px; font-size: 13px; border: 0.5px solid var(--borda); }
+  .cliente-nome { font-weight: 500; color: var(--texto); }
+  .cliente-detalhe { color: var(--suave); font-size: 12px; margin-top: 2px; }
+
+  .typing { display: flex; gap: 4px; align-items: center; padding: 12px 16px; }
+  .typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--suave); animation: blink 1.2s infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%, 60%, 100% { opacity: 0.2; transform: scale(0.8); } 30% { opacity: 1; transform: scale(1); } }
+
+  .input-area { background: var(--card); border-top: 0.5px solid var(--borda); padding: 10px 12px; display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; }
+  .input-wrap { flex: 1; background: var(--bg); border-radius: 22px; border: 0.5px solid var(--borda); display: flex; align-items: flex-end; padding: 8px 14px; gap: 8px; }
+
+  textarea { flex: 1; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--texto); resize: none; outline: none; max-height: 90px; line-height: 1.5; overflow-y: auto; }
+  textarea::placeholder { color: var(--suave); }
+
+  .send-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--verde); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s, transform 0.1s; }
+  .send-btn:active { transform: scale(0.93); background: var(--verde-meio); }
+  .send-btn svg { width: 18px; height: 18px; }
+
+  .dicas { padding: 8px 14px 2px; display: flex; gap: 8px; overflow-x: auto; flex-shrink: 0; }
+  .dicas::-webkit-scrollbar { display: none; }
+  .dica { background: white; border: 0.5px solid var(--borda); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--verde); white-space: nowrap; cursor: pointer; font-weight: 500; transition: background 0.15s; }
+  .dica:active { background: var(--verde-claro); }
+
+  .sheet-notice { background: #FFF8EC; border: 0.5px solid #F5C87A; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #856404; margin-top: 8px; display: flex; gap: 6px; align-items: flex-start; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-avatar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+    </div>
+    <div class="header-info">
+      <div class="header-nome">Assistente Realiza Tour</div>
+      <div class="header-status"><div class="status-dot"></div>online agora</div>
+    </div>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="msg-row agent">
+      <div class="msg-avatar">RT</div>
+      <div>
+        <div class="bubble agent">
+          Olá Ericson! Me conta sobre o cliente e eu organizo tudo pra você. Pode falar à vontade — tipo <em>"Maria Silva quer ir pra Fortaleza em agosto, casal, aguardando promoção"</em>
+        </div>
+        <div class="bubble-time">agora</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dicas">
+    <div class="dica" onclick="usarDica(this)">Novo interesse de cliente</div>
+    <div class="dica" onclick="usarDica(this)">Quem quer ir pra Gramado?</div>
+    <div class="dica" onclick="usarDica(this)">Listar clientes aguardando</div>
+    <div class="dica" onclick="usarDica(this)">Atualizar status de cliente</div>
+    <div class="dica" onclick="usarDica(this)">Listar vendidos</div>
+  </div>
+
+  <div class="input-area">
+    <div class="input-wrap">
+      <textarea id="input" placeholder="Fale sobre o cliente..." rows="1"></textarea>
+    </div>
+    <button class="send-btn" onclick="enviar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+const input = document.getElementById('input');
+const messagesEl = document.getElementById('messages');
+
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxkezr9JYIZGYq-TfQHTcrakHjqxl0BcrUCIow4pF_p15BjfshQnudUAdYGpYDDGIafnQ/exec';
+
+async function chamarAgente(texto) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 35000);
+  try {
+    const res = await fetch(SHEETS_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ acao: 'mensagem', texto })
+    });
+    clearTimeout(timeout);
+    return JSON.parse(await res.text());
+  } catch (err) {
+    clearTimeout(timeout);
+    throw err;
+  }
+}
+
+input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 90) + 'px'; });
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar(); } });
+function usarDica(el) { input.value = el.textContent; input.focus(); }
+function agora() { return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
+
+function addMsg(tipo, html, time) {
+  const row = document.createElement('div');
+  row.className = 'msg-row ' + tipo;
+  if (tipo === 'agent') { const av = document.createElement('div'); av.className = 'msg-avatar'; av.textContent = 'RT'; row.appendChild(av); }
+  const wrap = document.createElement('div');
+  const bubble = document.createElement('div'); bubble.className = 'bubble ' + tipo; bubble.innerHTML = html;
+  const t = document.createElement('div'); t.className = 'bubble-time'; t.textContent = time || agora();
+  wrap.appendChild(bubble); wrap.appendChild(t); row.appendChild(wrap);
+  messagesEl.appendChild(row); messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function addTyping() {
+  const row = document.createElement('div'); row.className = 'msg-row agent'; row.id = 'typing';
+  const av = document.createElement('div'); av.className = 'msg-avatar'; av.textContent = 'RT'; row.appendChild(av);
+  const bubble = document.createElement('div'); bubble.className = 'bubble agent';
+  bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  row.appendChild(bubble); messagesEl.appendChild(row); messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function removeTyping() { const t = document.getElementById('typing'); if (t) t.remove(); }
+
+function buildDadosCard(dados) {
+  const sc = dados.status && dados.status.toLowerCase().includes('orçamento') ? 'enviado' : '';
+  return `Registrado! Aqui o que salvei:
+    <div class="dados-card">
+      <div class="dado-linha"><span class="dado-label">Cliente</span><span class="dado-valor">${dados.nome||'—'}</span></div>
+      <div class="dado-linha"><span class="dado-label">Destino</span><span class="dado-valor">${dados.destino||'—'}</span></div>
+      <div class="dado-linha"><span class="dado-label">Período</span><span class="dado-valor">${dados.periodo||'—'}</span></div>
+      <div class="dado-linha"><span class="dado-label">Tipo</span><span class="dado-valor">${dados.tipo||'—'}</span></div>
+      <div class="dado-linha"><span class="dado-label">Status</span><span class="dado-valor"><span class="status-badge ${sc}">${dados.status||'—'}</span></span></div>
+      ${dados.observacoes ? `<div class="dado-linha"><span class="dado-label">Obs.</span><span class="dado-valor">${dados.observacoes}</span></div>` : ''}
+    </div>
+    <div class="sheet-notice">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Salvo na planilha Google Sheets automaticamente
+    </div>`;
+}
+
+function buildListaCard(lista) {
+  if (!lista || lista.length === 0) return 'Nenhum cliente encontrado com esse critério.';
+  return `Encontrei ${lista.length} cliente(s):<div class="clientes-lista">${lista.map(c => `
+    <div class="cliente-item">
+      <div class="cliente-nome">${c.nome}</div>
+      <div class="cliente-detalhe">${c.detalhe||(c.destino+' · '+c.periodo+' · '+c.status)}</div>
+    </div>`).join('')}</div>`;
+}
+
+async function enviar() {
+  const texto = input.value.trim();
+  if (!texto) return;
+  addMsg('user', texto);
+  input.value = ''; input.style.height = 'auto';
+  addTyping();
+  try {
+    const resultado = await chamarAgente(texto);
+    removeTyping();
+    if (!resultado.ok) { addMsg('agent', 'Erro ao processar. Tente novamente.'); return; }
+    const parsed = resultado.parsed;
+    if (parsed.tipo === 'registro') {
+      addMsg('agent', buildDadosCard(parsed.dados));
+    } else if (parsed.tipo === 'consulta') {
+      addMsg('agent', buildListaCard((parsed.lista||[]).map(c => ({ nome: c.nome, detalhe: c.detalhe||(c.destino+' · '+c.periodo+' · '+c.status) }))));
+    } else if (parsed.tipo === 'atualizacao') {
+      if (parsed.atualizado) {
+        const nome = parsed.nome_completo || parsed.nome;
+        const cancelado = parsed.valor && parsed.valor.toLowerCase() === 'cancelado';
+        const confirmado = parsed.valor && parsed.valor.toLowerCase() === 'confirmado';
+        const sc = confirmado ? 'enviado' : '';
+        const motivoHtml = cancelado
+          ? `<div class="dado-linha"><span class="dado-label">Motivo</span><span class="dado-valor" style="color:#856404;">${parsed.motivo||'Não informado'}</span></div>`
+          : '';
+        addMsg('agent', `Status atualizado com sucesso!
+          <div class="dados-card" style="margin-top:8px;">
+            <div class="dado-linha"><span class="dado-label">Cliente</span><span class="dado-valor">${nome}</span></div>
+            <div class="dado-linha"><span class="dado-label">Novo status</span><span class="dado-valor"><span class="status-badge ${sc}">${parsed.valor}</span></span></div>
+            ${motivoHtml}
+          </div>
+          <div class="sheet-notice">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Planilha atualizada automaticamente
+          </div>`);
+      } else {
+        addMsg('agent', `Não encontrei nenhum cliente com o nome <strong>${parsed.nome}</strong>. Verifique o nome e tente novamente.`);
+      }
+    } else {
+      addMsg('agent', parsed.mensagem || 'Pode repetir de outra forma?');
+    }
+  } catch (err) {
+    removeTyping();
+    addMsg('agent', 'Erro ao processar. Tente novamente.');
+  }
+}
+</script>
+</body>
+</html>
