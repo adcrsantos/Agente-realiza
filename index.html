@@ -410,7 +410,7 @@
   .card-atualizacao .card-titulo { background: #EAF4FF; color: #1565C0; }
 </style>
 </head>
-<body>
+<body class="aguardando-chave">
 
 <!-- HEADER -->
 <div class="header">
@@ -639,6 +639,92 @@ Retorne apenas JSON. Exemplos:
   return JSON.parse(txt);
 }
 
+// ── FLUXO REGISTRAR ────────────────────────────
+async function fluxoRegistrar(d) {
+  const data = new Date().toLocaleDateString('pt-BR');
+  const card = criarCardRegistro(d);
+  addMsg('agente', card);
+  await salvarNoSheets({ acao: 'registrar', data, ...d });
+}
+
+function criarCardRegistro(d) {
+  const wrap = document.createElement('div');
+  wrap.className = 'card-registro';
+  const statusClass = d.status === 'Vendido' ? 'badge-vendido'
+                    : d.status === 'Cancelado' ? 'badge-cancelado' : 'badge-andamento';
+  wrap.innerHTML = `
+    <div class="card-titulo">✅ Registrado! Aqui o que salvei:</div>
+    <div class="card-body">
+      <div class="card-linha"><span class="card-key">Cliente</span><span class="card-val ${d.nome?'':'vazio'}">${d.nome||'Não identificado'}</span></div>
+      <div class="card-linha"><span class="card-key">Destino</span><span class="card-val ${d.destino?'':'vazio'}">${d.destino||'Não mencionado'}</span></div>
+      <div class="card-linha"><span class="card-key">Período</span><span class="card-val ${d.periodo?'':'vazio'}">${d.periodo||'Não mencionado'}</span></div>
+      <div class="card-linha"><span class="card-key">Tipo</span><span class="card-val ${d.tipo?'':'vazio'}">${d.tipo||'Não identificado'}</span></div>
+      <div class="card-linha"><span class="card-key">Status</span><span class="card-val"><span class="badge ${statusClass}">${d.status}</span></span></div>
+      ${d.observacoes ? `<div class="card-linha"><span class="card-key">Obs</span><span class="card-val">${d.observacoes}</span></div>` : ''}
+    </div>
+    <div class="card-footer">📋 Salvo na planilha Google Sheets automaticamente</div>`;
+  return wrap;
+}
+
+// ── FLUXO BUSCAR ───────────────────────────────
+async function fluxoBuscar(filtro) {
+  addMsg('agente', 'Buscando na planilha…');
+  const clientes = await buscarNoSheets(filtro);
+  if (!clientes.length) {
+    addMsg('agente', `Não encontrei nenhum cliente${filtro.destino ? ' para ' + filtro.destino : ''}.`);
+    return;
+  }
+  const card = criarCardBusca(clientes, filtro.destino);
+  addMsg('agente', card);
+}
+
+function criarCardBusca(clientes, destino) {
+  const wrap = document.createElement('div');
+  wrap.className = 'card-busca';
+  const titulo = document.createElement('div');
+  titulo.className = 'card-titulo';
+  titulo.innerHTML = `🔍 Encontrei ${clientes.length} cliente(s)${destino ? ' para ' + destino : ''}:`;
+  wrap.appendChild(titulo);
+  clientes.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'busca-item';
+    const detalhe = [c.destino, c.periodo, c.observacoes].filter(Boolean).join(', ');
+    item.innerHTML = `<div class="busca-nome">${c.nome}</div>${detalhe ? `<div class="busca-detalhe">${detalhe}</div>` : ''}`;
+    wrap.appendChild(item);
+  });
+  const btn = document.createElement('button');
+  btn.className = 'btn-copiar';
+  btn.innerHTML = '📋 Copiar lista';
+  btn.onclick = () => {
+    const linhas = clientes.map(c => `• ${c.nome}`).join('\n');
+    const txt = `🌴 ${destino ? 'Interesse em ' + destino : 'Clientes'}:\n\n${linhas}\n\nRealiza Tour`;
+    navigator.clipboard.writeText(txt).then(() => {
+      btn.textContent = '✅ Copiado!'; btn.classList.add('copiado');
+      setTimeout(() => { btn.innerHTML = '📋 Copiar lista'; btn.classList.remove('copiado'); }, 2500);
+    });
+  };
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+// ── FLUXO ATUALIZAR ────────────────────────────
+async function fluxoAtualizar(d) {
+  addMsg('agente', `Atualizando ${d.nome || 'cliente'} na planilha…`);
+  await atualizarNoSheets(d);
+  const card = document.createElement('div');
+  card.className = 'card-atualizacao';
+  const statusClass = d.novoStatus === 'Vendido' ? 'badge-vendido'
+                    : d.novoStatus === 'Cancelado' ? 'badge-cancelado' : 'badge-andamento';
+  card.innerHTML = `
+    <div class="card-titulo">🔄 Status atualizado!</div>
+    <div class="card-body">
+      <div class="card-linha"><span class="card-key">Cliente</span><span class="card-val">${d.nome}</span></div>
+      <div class="card-linha"><span class="card-key">Novo status</span><span class="card-val"><span class="badge ${statusClass}">${d.novoStatus}</span></span></div>
+    </div>
+    <div class="card-footer">📋 Planilha atualizada automaticamente</div>`;
+  addMsg('agente', card);
+}
+
 // ── INTEGRAÇÃO SHEETS (via Apps Script) ───────
 async function salvarNoSheets(payload) {
   if (APPS_SCRIPT_URL === 'SUA_URL_DO_APPS_SCRIPT') return; // demo
@@ -668,15 +754,76 @@ async function atualizarNoSheets(d) {
   return true;
 }
 
-// Capturar chave na abertura
-(function() {
-  const key = prompt('Cole sua chave Anthropic (sk-ant-...):');
-  if (key && key.startsWith('sk-')) {
-    window._ak = key;
-  } else {
-    setTimeout(() => addMsg('agente', '⚠️ Chave inválida. Recarregue e tente novamente.'), 500);
+// Inicialização — chave via tela de entrada
+window._ak = '';
+
+function iniciar() {
+  try {
+    const salva = localStorage.getItem('rt_ak');
+    if (salva && salva.startsWith('sk-')) {
+      window._ak = salva;
+      document.body.classList.remove('aguardando-chave');
+      return;
+    }
+  } catch(e) {}
+  mostrarTelaChave();
+}
+
+function mostrarTelaChave() {
+  document.body.classList.add('aguardando-chave');
+  document.getElementById('telaChave').style.display = 'flex';
+}
+
+function confirmarChave() {
+  const key = document.getElementById('inputChave').value.trim();
+  if (!key.startsWith('sk-')) {
+    document.getElementById('erroChave').style.display = 'block';
+    return;
   }
-})();
+  window._ak = key;
+  try { localStorage.setItem('rt_ak', key); } catch(e) {}
+  document.getElementById('telaChave').style.display = 'none';
+  document.body.classList.remove('aguardando-chave');
+}
+
+function handleChaveKey(e) {
+  if (e.key === 'Enter') confirmarChave();
+}
+
+iniciar();
 </script>
+
+<!-- TELA DE ENTRADA DA CHAVE -->
+<div id="telaChave" style="display:flex; position:fixed; inset:0; background:#0F1612; z-index:100; flex-direction:column; align-items:center; justify-content:center; padding:32px 24px;">
+  <div style="max-width:360px; width:100%; text-align:center;">
+    <div style="font-size:40px; margin-bottom:16px;">✈️</div>
+    <div style="font-family:'Lora',serif; font-size:22px; color:#EAF0EC; font-weight:600; margin-bottom:8px;">Realiza Tour</div>
+    <div style="font-size:13px; color:#7A9487; margin-bottom:32px; line-height:1.6;">Agente de interesses de clientes</div>
+
+    <div style="background:#161E19; border:1.5px solid #2A3830; border-radius:16px; padding:24px; text-align:left;">
+      <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:#7A9487; margin-bottom:10px;">Chave de acesso</div>
+      <input
+        id="inputChave"
+        type="password"
+        placeholder="sk-ant-..."
+        onkeydown="handleChaveKey(event)"
+        style="width:100%; background:#0F1612; border:1.5px solid #2A3830; border-radius:10px; padding:12px 14px; font-size:14px; color:#EAF0EC; outline:none; font-family:'DM Sans',sans-serif; margin-bottom:8px;"
+        onfocus="this.style.borderColor='#12956A'"
+        onblur="this.style.borderColor='#2A3830'"
+      />
+      <div id="erroChave" style="display:none; font-size:12px; color:#E05252; margin-bottom:10px;">Chave inválida. Começa com sk-ant-...</div>
+      <button
+        onclick="confirmarChave()"
+        style="width:100%; background:#12956A; color:white; border:none; border-radius:10px; padding:13px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; margin-top:4px;">
+        Entrar
+      </button>
+    </div>
+
+    <div style="font-size:11px; color:#3A5248; margin-top:16px; line-height:1.6;">
+      A chave fica salva neste dispositivo.<br>Não é compartilhada com ninguém.
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
